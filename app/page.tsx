@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react"; // 👈 das ist der Fix!
 import { useState } from "react";
 import { QRCode } from "react-qrcode-logo";
 import { FaQrcode } from "react-icons/fa";
