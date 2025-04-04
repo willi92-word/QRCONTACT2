@@ -1,4 +1,4 @@
-import "./globals.css";
+import "./globals.css"; // ✅ richtig
 import { Inter } from "next/font/google";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
