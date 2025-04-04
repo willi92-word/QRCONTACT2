@@ -5,6 +5,8 @@ import { QRCode } from "react-qrcode-logo";
 import { FaQrcode } from "react-icons/fa";
 import Link from "next/link";
 
+console.log("🚀 Page loaded");
+
 export default function Home() {
   const [licensePlate, setLicensePlate] = useState("");
   const [email, setEmail] = useState("");
