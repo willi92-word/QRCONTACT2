@@ -37,34 +37,41 @@ export default function AdminDashboard() {
   const [filter, setFilter] = useState("Alle");
   const [replyText, setReplyText] = useState("");
   const [selectedEmail, setSelectedEmail] = useState<string | null>(null);
+ 
 
   useEffect(() => {
     const username = localStorage.getItem("adminUser");
     const password = localStorage.getItem("adminPass");
-
+  
     if (!username || !password) {
       router.push("/admin-login");
       return;
     }
-    setAdminUser(username);
-
-    fetch("http://localhost:5001/api/admin/backups", {
-      headers: { Authorization: "Basic " + btoa(`${username}:${password}`) },
+  
+    setAdminUser(username); // 🧠 Benutzername im State speichern
+  
+    // 🗂️ 1. Backups laden
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/backups`, {
+      headers: {
+        Authorization: "Basic " + btoa(`${username}:${password}`),
+      },
     })
       .then((res) => res.json())
       .then((data) => {
         const sorted = data.entries.sort(
-          (a: BackupEntry, b: BackupEntry) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+          (a: BackupEntry, b: BackupEntry) =>
+            new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
         );
         setEntries(sorted);
         setLoaded(true);
       });
-
-    fetch("http://localhost:5001/api/admin/support")
+  
+    // 📩 2. Support-Nachrichten laden
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/support`)
       .then((res) => res.json())
       .then((data) => setSupportMessages(data.messages || []));
   }, [router]);
-
+    
   const stats = {
     today: entries.filter((e) => dayjs(e.timestamp).isToday()).length,
     yesterday: entries.filter((e) => dayjs(e.timestamp).isYesterday()).length,
@@ -90,7 +97,7 @@ export default function AdminDashboard() {
 
   const handleReply = async () => {
     if (!replyText || !selectedEmail) return;
-    await fetch("http://localhost:5001/api/support-reply", {
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/support-reply`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email: selectedEmail, message: replyText }),
@@ -102,7 +109,7 @@ export default function AdminDashboard() {
 
   const handlePdfDownload = async (licensePlate: string) => {
     try {
-      const res = await fetch("http://localhost:5001/api/generate-pdf", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/generate-pdf`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ licensePlate }),
@@ -125,7 +132,7 @@ export default function AdminDashboard() {
 
   const handleResendEmail = async (email: string, licensePlate: string) => {
     try {
-      const res = await fetch("http://localhost:5001/api/send-email", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/send-email`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, licensePlate }),
@@ -143,7 +150,7 @@ export default function AdminDashboard() {
   };
 
   const downloadCSV = (): void => {
-    fetch("http://localhost:5001/api/export-backup")
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/export-backup`)
       .then((res) => {
         if (!res.ok) throw new Error("Fehler beim Abrufen der CSV-Datei.");
         return res.blob();

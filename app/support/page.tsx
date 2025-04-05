@@ -9,27 +9,26 @@ export default function SupportPage() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [sent, setSent] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async () => {
     if (!message) return alert("Bitte gib eine Nachricht ein.");
 
     try {
-      const res = await fetch("http://localhost:5001/api/contact", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/contact`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          licensePlate: "SUPPORT",
+          licensePlate: "SUPPORT", // wird im Server als Support erkannt
           message: `[Support-Anfrage]\n\n${message}`,
           email,
         }),
       });
 
-      if (res.ok) {
-        setSent(true);
-      } else {
-        alert("Fehler beim Senden der Nachricht.");
+      if (!response.ok) {
+        console.error("Fehler beim Senden");
+        // oder zeige eine Fehlermeldung in der UI:
+        setError("Fehler beim Senden der Nachricht");
       }
     } catch (err) {
       console.error("❌ Fehler beim Versenden:", err);

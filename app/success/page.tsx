@@ -22,7 +22,7 @@ export default function SuccessPage() {
       setEmail(storedEmail);
       setLicensePlate(storedPlate);
 
-      fetch("http://localhost:5001/api/send-email", {
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/send-email`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: storedEmail, licensePlate: storedPlate }),

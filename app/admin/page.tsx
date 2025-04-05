@@ -13,19 +13,27 @@ export default function AdminPage() {
   const [backups, setBackups] = useState<BackupEntry[]>([]);
   const [checkedItems, setCheckedItems] = useState<string[]>([]);
 
+  // 🚀 Backup-Daten laden
   useEffect(() => {
-    fetch("http://localhost:5001/api/backup")
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/backup`)
       .then((res) => res.json())
       .then((data) => {
         setBackups(data);
+      })
+      .catch((err) => {
+        console.error("❌ Fehler beim Laden der Backups:", err);
       });
+  }, []);
 
+  // ✅ Geklickte Einträge aus localStorage laden (💡 vorher war das versehentlich außerhalb eines useEffect)
+  useEffect(() => {
     const saved = localStorage.getItem("checkedBackups");
     if (saved) {
       setCheckedItems(JSON.parse(saved));
     }
   }, []);
 
+  // 🔄 Auswahl speichern
   const toggleCheck = (timestamp: string) => {
     const updated = checkedItems.includes(timestamp)
       ? checkedItems.filter((t) => t !== timestamp)
@@ -62,8 +70,8 @@ export default function AdminPage() {
             <a
               href={entry.qrUrl}
               target="_blank"
-              className="text-blue-600 text-sm hover:underline"
               rel="noopener noreferrer"
+              className="text-blue-600 text-sm hover:underline"
             >
               🔗 QR-Code anzeigen
             </a>

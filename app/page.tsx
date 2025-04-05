@@ -22,9 +22,9 @@ export default function Home() {
     localStorage.setItem("licensePlate", licensePlate);
 
     try {
-      const response = await fetch("http://localhost:5001/api/pay", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/send-email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, licensePlate }),
       });
 
