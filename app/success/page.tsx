@@ -17,6 +17,8 @@ export default function Page() {
   const router = useRouter();
   const session_id = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("session_id") : null;
 
+  console.log("🚀 Seite geladen");
+console.log("🔎 window.location.search:", typeof window !== "undefined" ? window.location.search : "window undefined");
   useEffect(() => {
     console.log("🌐 session_id:", session_id);
   
@@ -40,7 +42,7 @@ export default function Page() {
         });
     }
   }, [session_id]);
-  
+
   useEffect(() => {
     if (session_id && typeof session_id === "string") {
       fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/fulfill-order`, {
@@ -142,6 +144,13 @@ export default function Page() {
           </p>
         )}
       </motion.div>
+
+      <h1 className="text-3xl font-bold text-green-600 mb-1">✅ Zahlung erfolgreich!</h1>
+<p className="text-sm text-gray-600 mb-6">Dein QR-Code ist bereit. Bist du es auch? 😏</p>
+
+<p className="text-xs text-red-500 mb-6">
+  Session ID: {session_id ?? "❌ Nicht gefunden"}
+</p>
 
       {/* Footer */}
       <footer className="mt-12 text-sm text-gray-400 text-center">
