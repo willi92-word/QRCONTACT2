@@ -20,13 +20,6 @@ export default function Page() {
       ? new URLSearchParams(window.location.search).get("session_id")
       : null;
 
-  console.log("📦 Session ID:", session_id);
-  console.log("🚀 Seite geladen");
-  console.log(
-    "🔎 window.location.search:",
-    typeof window !== "undefined" ? window.location.search : "window undefined"
-  );
-
   useEffect(() => {
     if (session_id && typeof session_id === "string") {
       fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/fulfill-order`, {
@@ -36,7 +29,6 @@ export default function Page() {
       })
         .then((res) => res.json())
         .then((data) => {
-          console.log("📦 Fulfill response:", data);
           if (data.success) {
             setEmail(data.email);
             setLicensePlate(data.licensePlate);
@@ -77,7 +69,6 @@ export default function Page() {
       transition={{ duration: 0.6, ease: "easeOut" }}
       className="flex flex-col items-center min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 text-gray-900 p-6"
     >
-      {/* Branding */}
       <div className="flex items-center justify-center gap-2 mb-6">
         <svg className="w-8 h-8 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
           <path d="M3 3h7v7H3V3zm0 11h7v7H3v-7zm11-11h7v7h-7V3zm0 11h7v7h-7v-7z" />
@@ -87,7 +78,6 @@ export default function Page() {
         </span>
       </div>
 
-      {/* QR & Message Card */}
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -123,13 +113,11 @@ export default function Page() {
 
         {emailSent && (
           <p className="mt-6 text-sm text-gray-400 italic">
-            📧 E-Mail an <span className="font-medium text-gray-600">{email}</span> wurde verschickt.
-            Viel Spaß mit deinem Code! 🚗
+            📧 E-Mail an <span className="font-medium text-gray-600">{email}</span> wurde verschickt. Viel Spaß mit deinem Code! 🚗
           </p>
         )}
       </motion.div>
 
-      {/* Footer */}
       <footer className="mt-12 text-sm text-gray-400 text-center">
         <p className="mb-1">
           <Link href="/impressum" className="hover:underline">Impressum</Link>
