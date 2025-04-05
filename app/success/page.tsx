@@ -9,7 +9,7 @@ import ShareButtons from "../../components/ShareButtons";
 import { motion } from "framer-motion";
 import Link from "next/link";
 
-export default function SuccessPage() {
+export default function Page() {
   const [email, setEmail] = useState("");
   const [licensePlate, setLicensePlate] = useState("");
   const [emailSent, setEmailSent] = useState(false);
