@@ -18,6 +18,30 @@ export default function Page() {
   const session_id = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("session_id") : null;
 
   useEffect(() => {
+    console.log("🌐 session_id:", session_id);
+  
+    if (session_id && typeof session_id === "string") {
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/fulfill-order`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ session_id }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          console.log("📦 Fulfill response:", data); // << hier siehst du, ob etwas zurückkommt
+          if (data.success) {
+            setEmail(data.email);
+            setLicensePlate(data.licensePlate);
+            setEmailSent(true);
+          }
+        })
+        .catch((err) => {
+          console.error("❌ Verbindung fehlgeschlagen:", err.message);
+        });
+    }
+  }, [session_id]);
+  
+  useEffect(() => {
     if (session_id && typeof session_id === "string") {
       fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/fulfill-order`, {
         method: "POST",
