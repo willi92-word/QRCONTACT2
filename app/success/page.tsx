@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 import { toPng } from "html-to-image";
 import { QRCode } from "react-qrcode-logo";
 import ShareButtons from "../../components/ShareButtons";
@@ -12,42 +13,34 @@ export default function SuccessPage() {
   const [licensePlate, setLicensePlate] = useState("");
   const [emailSent, setEmailSent] = useState(false);
 
-  const shareUrl = `https://qrcontact.de/qrcode/${licensePlate}`;
+  const router = useRouter();
+  const session_id = router.query.session_id;
 
   useEffect(() => {
-    const storedEmail = localStorage.getItem("email");
-    const storedPlate = localStorage.getItem("licensePlate");
-
-    if (storedEmail && storedPlate) {
-      setEmail(storedEmail);
-      setLicensePlate(storedPlate);
-
-      fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/send-email`, {
+    if (session_id && typeof session_id === "string") {
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/fulfill-order`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: storedEmail, licensePlate: storedPlate }),
+        body: JSON.stringify({ session_id }),
       })
-        .then(async (res) => {
-          if (!res.ok) {
-            const text = await res.text();
-            console.error("❌ Fehlerantwort vom Server:", text);
-            throw new Error("Serverfehler beim Senden");
-          }
-          return res.json();
-        })
+        .then((res) => res.json())
         .then((data) => {
           if (data.success) {
-            console.log("✅ E-Mail wurde verschickt");
+            setEmail(data.email);
+            setLicensePlate(data.licensePlate);
             setEmailSent(true);
+            console.log("✅ QR-Mail wurde versendet!");
           } else {
-            console.error("❌ Fehler beim E-Mail-Versand:", data);
+            console.error("❌ Fehler beim Fulfill:", data.error);
           }
         })
         .catch((err) => {
           console.error("❌ Verbindungsfehler:", err.message);
         });
     }
-  }, []);
+  }, [session_id]);
+
+  const shareUrl = `https://qrcontact.de/qrcode/${licensePlate}`;
 
   const downloadQR = () => {
     const qrElement = document.getElementById("qr-code");
@@ -120,7 +113,7 @@ export default function SuccessPage() {
         {emailSent && (
           <p className="mt-6 text-sm text-gray-400 italic">
             📧 E-Mail an <span className="font-medium text-gray-600">{email}</span> wurde verschickt.
-            Ignorier sie auf eigene Gefahr. 😈
+            Viel Spaß mit deinem Code! 🚗
           </p>
         )}
       </motion.div>
