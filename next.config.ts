@@ -1,11 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   eslint: {
-    ignoreDuringBuilds: true, // ✅ ESLint beim Build ignorieren (wie gehabt)
+    ignoreDuringBuilds: true, // ✅ ESLint beim Build ignorieren (optional)
   },
-  output: "standalone", // ✅ wichtig für Vercel/Render
+  output: "standalone", // ✅ wichtig für z. B. Render-Deployments
   experimental: {
     serverActions: true,
+    appDir: true, // ✅ für App Router erforderlich!
   },
 };
 
