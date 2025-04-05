@@ -17,21 +17,21 @@ export default function Home() {
       alert("Bitte gib dein Kennzeichen und deine E-Mail ein!");
       return;
     }
-
+  
     localStorage.setItem("email", email);
     localStorage.setItem("licensePlate", licensePlate);
-
+  
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/send-email`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/pay`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, licensePlate }),
       });
-
+  
       const data = await response.json();
-
+  
       if (data.url) {
-        window.location.href = data.url;
+        window.location.href = data.url; // 🚀 Weiterleitung zur Zahlung
       } else {
         alert("Fehler beim Starten der Zahlung.");
       }
