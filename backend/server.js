@@ -52,6 +52,135 @@ const emailTemplate = `
   </div>
 </div>
 `;
+const sendQrMail = async (email, licensePlate) => {
+  try {
+    const qrUrl = `https://qrcontact.de/contact/${licensePlate}`;
+    const qrImageBuffer = await QRCode.toBuffer(qrUrl);
+
+    const pdfDoc = await PDFDocument.create();
+    const page = pdfDoc.addPage([270, 170]);
+    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+
+    const black = rgb(0, 0, 0);
+    const blue = rgb(0.26, 0.46, 0.96);
+    const gray = rgb(0.5, 0.5, 0.5);
+    const lightGray = rgb(0.8, 0.8, 0.8);
+
+    page.drawRectangle({ x: 0, y: 140, width: 270, height: 30, color: black });
+    page.drawText("#", { x: 16, y: 148, size: 14, font: boldFont, color: blue });
+    page.drawText("qr", { x: 36, y: 148, size: 14, font: boldFont, color: rgb(1, 1, 1) });
+    page.drawText("contact", { x: 50, y: 148, size: 14, font: boldFont, color: blue });
+
+    const qrImage = await pdfDoc.embedPng(qrImageBuffer);
+    const qrSize = 90;
+    page.drawImage(qrImage, {
+      x: (270 - qrSize) / 2,
+      y: 40,
+      width: qrSize,
+      height: qrSize,
+    });
+
+    const description = "Scannen für anonyme Kontaktaufnahme des Besitzers";
+    const footer = "Erstellt mit qrcontact.de";
+
+    page.drawText(description, {
+      x: (270 - font.widthOfTextAtSize(description, 10)) / 2,
+      y: 25,
+      size: 10,
+      font,
+      color: gray,
+    });
+
+    page.drawText(footer, {
+      x: (270 - font.widthOfTextAtSize(footer, 8)) / 2,
+      y: 12,
+      size: 8,
+      font,
+      color: lightGray,
+    });
+
+    const cutLineColor = rgb(0.7, 0.7, 0.7);
+    const lineWidth = 0.4;
+
+    page.drawLine({ start: { x: 30, y: 0 }, end: { x: 30, y: 170 }, thickness: lineWidth, color: cutLineColor, opacity: 0.7 });
+    page.drawLine({ start: { x: 240, y: 0 }, end: { x: 240, y: 170 }, thickness: lineWidth, color: cutLineColor, opacity: 0.7 });
+    page.drawLine({ start: { x: 0, y: 150 }, end: { x: 270, y: 150 }, thickness: lineWidth, color: cutLineColor, opacity: 0.7 });
+    page.drawLine({ start: { x: 0, y: 20 }, end: { x: 270, y: 20 }, thickness: lineWidth, color: cutLineColor, opacity: 0.7 });
+
+    const pdfBytes = await pdfDoc.save();
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: "🎉 Dein QRContact ist bereit!",
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: auto;">
+          <div style="background: #111827; padding: 16px 24px; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+            <span style="font-size: 22px; font-weight: bold; color: #3B82F6;">▦</span>
+            <span style="font-size: 22px; font-weight: bold; color: white;">qr</span>
+            <span style="font-size: 22px; font-weight: bold; color: #3B82F6;">contact</span>
+          </div>
+          <div style="padding: 24px; background: white; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
+            <h2 style="font-size: 20px; font-weight: bold; margin-bottom: 8px;">🎉 Dein QRContact ist bereit!</h2>
+            <p style="font-size: 15px;">Danke für deinen Kauf. Hier ist dein persönlicher QR-Code für das Kennzeichen <strong>${licensePlate}</strong>:</p>
+            <p><img src="cid:qrcode" alt="QR Code" style="margin: 20px 0; width: 160px;" /></p>
+            <p style="font-size: 13px;">Scanne oder drucke ihn aus. Der Link führt zu:</p>
+            <p style="font-size: 13px;"><a href="${qrUrl}">${qrUrl}</a></p>
+            <p style="font-size: 13px;">Viel Freude wünscht dir 💝 <br/>– Dein QRContact Team</p>
+          </div>
+        </div>
+      `,
+      attachments: [
+        {
+          filename: `qr-${licensePlate}.png`,
+          content: qrImageBuffer,
+          cid: "qrcode",
+        },
+        {
+          filename: `qr-${licensePlate}.pdf`,
+          content: pdfBytes,
+        },
+      ],
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log("✅ E-Mail mit QR-Code gesendet an:", email);
+
+    // 📁 Backup
+    const backupDir = path.join(__dirname, "backups");
+    const backupPath = path.join(backupDir, "backup.json");
+
+    if (!fs.existsSync(backupDir)) {
+      fs.mkdirSync(backupDir, { recursive: true });
+    }
+
+    const backupData = fs.existsSync(backupPath)
+      ? JSON.parse(fs.readFileSync(backupPath, "utf-8"))
+      : [];
+
+    backupData.push({
+      timestamp: new Date().toISOString(),
+      email,
+      licensePlate,
+    });
+
+    fs.writeFileSync(backupPath, JSON.stringify(backupData, null, 2));
+    console.log("✅ Backup gespeichert für:", email);
+
+  } catch (error) {
+    console.error("❌ Fehler beim Senden der E-Mail oder Speichern:", error);
+    throw error;
+  }
+};
 
 // 🔽 Pfad-Utilities für ES Modules
 const __filename = fileURLToPath(import.meta.url);
