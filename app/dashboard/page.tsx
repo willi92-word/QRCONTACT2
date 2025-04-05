@@ -30,7 +30,7 @@ export default function AdminDashboard() {
   const router = useRouter();
   const [entries, setEntries] = useState<BackupEntry[]>([]);
   const [supportMessages, setSupportMessages] = useState<SupportMessage[]>([]);
-  const [adminUser, setAdminUser] = useState<string | null>(null);
+  const [_adminUser, setAdminUser] = useState<string | null>(null);// ✅ erlaubt
   const [loaded, setLoaded] = useState(false);
   const [tab, setTab] = useState("dashboard");
   const [searchTerm, setSearchTerm] = useState("");

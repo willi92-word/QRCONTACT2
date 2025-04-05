@@ -3,6 +3,8 @@
 import { motion } from "framer-motion";
 import { FaTimesCircle } from "react-icons/fa";
 import { useEffect } from "react";
+import Link from 'next/link';
+
 
 export default function CancelPage() {
   useEffect(() => {
@@ -33,12 +35,11 @@ export default function CancelPage() {
           Kein Problem – du kannst deinen QR-Code jederzeit später bestellen.
         </p>
 
-        <a
-          href="/"
+        <Link href="/"
           className="bg-neutral-900 hover:bg-neutral-800 text-white font-medium px-6 py-3 rounded-xl transition-colors"
         >
           Zurück zur Startseite
-        </a>
+          </Link>
       </motion.div>
 
       <footer className="mt-12 text-sm text-gray-400 text-center">

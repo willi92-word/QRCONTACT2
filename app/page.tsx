@@ -71,7 +71,7 @@ export default function Home() {
         </p>
 
         <div className="bg-white shadow-2xl rounded-2xl p-8 mb-12">
-          <h2 className="text-2xl font-medium mb-4">So funktioniert's:</h2>
+          <h2 className="text-2xl font-medium mb-4">So funktioniert&apos;s:</h2>
           <ol className="list-decimal list-inside text-left text-gray-700 space-y-2">
             <li>Gib dein Kennzeichen und deine E-Mail ein.</li>
             <li>Bestelle deinen persönlichen QR-Code für nur <strong>1,99 €</strong>.</li>

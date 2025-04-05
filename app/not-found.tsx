@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { QRCode } from "react-qrcode-logo";
 import { FaRegCompass } from "react-icons/fa";
 import { useEffect, useState } from "react";
+import Link from 'next/link';
 
 const funFacts = [
   "📱 Wusstest du? QR steht für 'Quick Response'!",
@@ -74,12 +75,11 @@ export default function NotFoundPage() {
           </motion.p>
         )}
 
-        <a
-          href="/"
+        <Link href="/"
           className="inline-block bg-neutral-900 hover:bg-neutral-800 text-white font-medium px-6 py-3 rounded-xl transition-colors"
         >
           Zurück zur Startseite
-        </a>
+          </Link> 
 
         {randomFact && (
           <p className="mt-6 text-sm text-gray-500 italic">{randomFact}</p>
