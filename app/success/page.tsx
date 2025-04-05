@@ -1,7 +1,8 @@
 "use client";
+export const dynamic = "force-dynamic";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation"; // ✅ korrekt für App Router
 import { toPng } from "html-to-image";
 import { QRCode } from "react-qrcode-logo";
 import ShareButtons from "../../components/ShareButtons";
@@ -14,7 +15,7 @@ export default function SuccessPage() {
   const [emailSent, setEmailSent] = useState(false);
 
   const router = useRouter();
-  const session_id = router.query.session_id;
+  const session_id = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("session_id") : null;
 
   useEffect(() => {
     if (session_id && typeof session_id === "string") {
