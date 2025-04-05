@@ -10,6 +10,7 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import QRCode from 'qrcode';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+import Stripe from 'stripe';
 
 dotenv.config();
 
@@ -55,6 +56,7 @@ const emailTemplate = `
 // 🔽 Pfad-Utilities für ES Modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // 🚀 Express App
 const app = express();
@@ -231,12 +233,63 @@ app.get('/api/admin/backups', basicAuth, (req, res) => {
   }
 });
 
-// 💳 Dummy-Zahlung
-app.post('/api/pay', (req, res) => {
+// 💳 STRIPE-Zahlung
+app.post('/api/pay', async (req, res) => {
   const { email, licensePlate } = req.body;
-  console.log('💳 Zahlungsanfrage erhalten:', { email, licensePlate });
-  const dummyCheckoutUrl = 'https://buy.stripe.com/test_7sI6qSgkNb5X8rm5kk';
-  res.json({ url: dummyCheckoutUrl });
+
+  try {
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      mode: 'payment',
+      customer_email: email,
+      line_items: [
+        {
+          price_data: {
+            currency: 'eur',
+            product_data: {
+              name: `QR-Code für ${licensePlate}`,
+            },
+            unit_amount: 199, // 💶 1,99€ in Cent
+          },
+          quantity: 1,
+        },
+      ],
+      metadata: {
+        licensePlate,
+        email,
+      },
+      success_url: `${process.env.FRONTEND_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.FRONTEND_URL}/`,
+    });
+
+    console.log("✅ Stripe-Session erstellt:", session.id);
+    res.json({ url: session.url });
+  } catch (error) {
+    console.error("❌ Stripe Fehler:", error);
+    res.status(500).json({ error: "Stripe-Fehler beim Erstellen der Zahlung" });
+  }
+});
+
+app.post("/api/fulfill-order", async (req, res) => {
+  const { session_id } = req.body;
+
+  try {
+    const session = await stripe.checkout.sessions.retrieve(session_id);
+
+    const email = session.customer_email;
+    const licensePlate = session.metadata.licensePlate;
+
+    // 🔁 Nutze hier deinen bestehenden Mailversand (copy von /api/send-email)
+    // oder rufe einfach deine sendEmailLogik(email, licensePlate) auf
+
+    // Beispiel:
+    await sendQrMail(email, licensePlate); // 🔧 Extrahiere deine Logik in eine Funktion
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("❌ Fehler beim Fulfillen:", err);
+    res.status(500).json({ success: false, error: "Fehler beim Fulfillment" });
+  }
 });
 
 // 📤 E-Mail mit QR-Code + PDF
