@@ -2,7 +2,7 @@
 export const dynamic = "force-dynamic";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation"; // ✅ korrekt für App Router
+import { useRouter } from "next/navigation";
 import { toPng } from "html-to-image";
 import { QRCode } from "react-qrcode-logo";
 import ShareButtons from "../../components/ShareButtons";
@@ -15,33 +15,17 @@ export default function Page() {
   const [emailSent, setEmailSent] = useState(false);
 
   const router = useRouter();
-  const session_id = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("session_id") : null;
+  const session_id =
+    typeof window !== "undefined"
+      ? new URLSearchParams(window.location.search).get("session_id")
+      : null;
 
+  console.log("📦 Session ID:", session_id);
   console.log("🚀 Seite geladen");
-console.log("🔎 window.location.search:", typeof window !== "undefined" ? window.location.search : "window undefined");
-  useEffect(() => {
-    console.log("🌐 session_id:", session_id);
-  
-    if (session_id && typeof session_id === "string") {
-      fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/fulfill-order`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ session_id }),
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          console.log("📦 Fulfill response:", data); // << hier siehst du, ob etwas zurückkommt
-          if (data.success) {
-            setEmail(data.email);
-            setLicensePlate(data.licensePlate);
-            setEmailSent(true);
-          }
-        })
-        .catch((err) => {
-          console.error("❌ Verbindung fehlgeschlagen:", err.message);
-        });
-    }
-  }, [session_id]);
+  console.log(
+    "🔎 window.location.search:",
+    typeof window !== "undefined" ? window.location.search : "window undefined"
+  );
 
   useEffect(() => {
     if (session_id && typeof session_id === "string") {
@@ -52,11 +36,11 @@ console.log("🔎 window.location.search:", typeof window !== "undefined" ? wind
       })
         .then((res) => res.json())
         .then((data) => {
+          console.log("📦 Fulfill response:", data);
           if (data.success) {
             setEmail(data.email);
             setLicensePlate(data.licensePlate);
             setEmailSent(true);
-            console.log("✅ QR-Mail wurde versendet!");
           } else {
             console.error("❌ Fehler beim Fulfill:", data.error);
           }
@@ -144,13 +128,6 @@ console.log("🔎 window.location.search:", typeof window !== "undefined" ? wind
           </p>
         )}
       </motion.div>
-
-      <h1 className="text-3xl font-bold text-green-600 mb-1">✅ Zahlung erfolgreich!</h1>
-<p className="text-sm text-gray-600 mb-6">Dein QR-Code ist bereit. Bist du es auch? 😏</p>
-
-<p className="text-xs text-red-500 mb-6">
-  Session ID: {session_id ?? "❌ Nicht gefunden"}
-</p>
 
       {/* Footer */}
       <footer className="mt-12 text-sm text-gray-400 text-center">
