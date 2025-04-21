@@ -21,6 +21,7 @@ export default function Page() {
       : null;
 
   useEffect(() => {
+    console.log("🔍 session_id:", session_id);
     if (session_id && typeof session_id === "string") {
       fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/fulfill-order`, {
         method: "POST",
@@ -29,6 +30,7 @@ export default function Page() {
       })
         .then((res) => res.json())
         .then((data) => {
+          console.log("📦 Fulfill response:", data);
           if (data.success) {
             setEmail(data.email);
             setLicensePlate(data.licensePlate);
@@ -86,6 +88,8 @@ export default function Page() {
       >
         <h1 className="text-3xl font-bold text-green-600 mb-1">✅ Zahlung erfolgreich!</h1>
         <p className="text-sm text-gray-600 mb-6">Dein QR-Code ist bereit. Bist du es auch? 😏</p>
+
+        <p className="text-xs text-red-500 mt-2">Debug: {licensePlate ? `✅ ${licensePlate}` : "❌ Kein Kennzeichen"}</p>
 
         {licensePlate && (
           <>
