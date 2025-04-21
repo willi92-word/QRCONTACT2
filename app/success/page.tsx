@@ -14,6 +14,10 @@ export default function Page() {
   const [licensePlate, setLicensePlate] = useState("");
   const [emailSent, setEmailSent] = useState(false);
 
+  const baseUrl = process.env.NEXT_PUBLIC_FRONTEND_URL || "https://qrcontact-2.vercel.app";
+  const shareUrl = `${baseUrl}/qrcode/${licensePlate}`;
+  const contactUrl = `${baseUrl}/contact/${licensePlate}`;
+
   const router = useRouter();
   const session_id =
     typeof window !== "undefined"
@@ -44,8 +48,6 @@ export default function Page() {
         });
     }
   }, [session_id]);
-
-  const shareUrl = `https://qrcontact.de/qrcode/${licensePlate}`;
 
   const downloadQR = () => {
     const qrElement = document.getElementById("qr-code");
@@ -95,7 +97,7 @@ export default function Page() {
           <>
             <div id="qr-code" className="bg-gray-100 p-6 rounded-xl mb-4 flex flex-col items-center">
               <QRCode
-                value={`https://qrcontact.de/contact/${licensePlate}`}
+                value={contactUrl}
                 size={140}
                 bgColor="#f9fafb"
                 fgColor="#111"
