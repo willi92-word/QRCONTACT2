@@ -414,7 +414,11 @@ app.post("/api/fulfill-order", async (req, res) => {
     // Beispiel:
     await sendQrMail(email, licensePlate); // 🔧 Extrahiere deine Logik in eine Funktion
 
-    res.json({ success: true });
+    res.json({
+      success: true,
+      email,
+      licensePlate,
+    });
   } catch (err) {
     console.error("❌ Fehler beim Fulfillen:", err);
     res.status(500).json({ success: false, error: "Fehler beim Fulfillment" });
